@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Keggy - Sexual Performance & Kegel Routine Planner</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fff1f3',
+                            100: '#ffe4e8',
+                            400: '#fb7185',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            900: '#881337',
+                        }
+                    },
+                    boxShadow: {
+                        'neon-rose': '0 0 20px -2px rgba(244, 63, 94, 0.35)',
+                        'neon-amber': '0 0 20px -2px rgba(245, 158, 11, 0.3)',
+                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.4)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .checkbox-glow:checked + div {
+            background: linear-gradient(135deg, #f43f5e 0%, #8b5cf6 100%);
+            border-color: transparent;
+            box-shadow: 0 0 12px rgba(244, 63, 94, 0.5);
+        }
+
+        /* Hide scrollbars for slick mobile bar */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-full text-slate-100 bg-slate-950 antialiased flex flex-col items-center justify-start overflow-x-hidden">
+
+    <!-- Ambient Backdrop Effects -->
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-md h-80 bg-gradient-to-b from-rose-900/20 via-violet-900/10 to-transparent blur-3xl pointer-events-none -z-10"></div>
+
+    <!-- Main Mobile Application Container -->
+    <main class="w-full max-w-md min-h-screen flex flex-col justify-between px-3.5 py-4 space-y-3.5 relative">
+
+        <!-- Top Header & Brand Bar -->
+        <header class="flex items-center justify-between px-0.5">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-rose-600 to-violet-600 flex items-center justify-center shadow-neon-rose shrink-0">
+                    <i data-lucide="flame" class="w-4 h-4 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-rose-200 to-rose-400 bg-clip-text text-transparent leading-none">
+                        Keggy
+                    </h1>
+                    <p class="text-[10px] text-slate-400 font-medium tracking-tight mt-0.5">Sexual Wellness & Rest Planner</p>
+                </div>
+            </div>
+
+            <!-- Streak Counter Badge -->
+            <div class="glass-card px-2.5 py-1 rounded-xl border border-rose-500/20 flex items-center space-x-1.5 shrink-0">
+                <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400 fill-amber-400"></i>
+                <div class="leading-none">
+                    <span id="streakCount" class="text-xs font-bold text-slate-100">0</span>
+                    <span class="text-[9px] text-slate-400 font-medium uppercase tracking-wider block">Days</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 7-Day Compact Horizontal Selector Bar -->
+        <section class="glass-card rounded-2xl p-2 shadow-glass border border-slate-800 space-y-1.5">
+            <div class="flex items-center justify-between px-1">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Weekly Schedule View</span>
+                <button id="todayBtn" class="text-[10px] text-rose-400 hover:text-rose-300 font-semibold transition-colors flex items-center gap-0.5">
+                    Jump to Today <i data-lucide="corner-down-left" class="w-2.5 h-2.5"></i>
+                </button>
+            </div>
+
+            <!-- Compact Days Bar -->
+            <div id="daysBar" class="grid grid-cols-7 gap-1">
+                <!-- Javascript populates 7 day pill buttons here -->
+            </div>
+        </section>
+
+        <!-- Today's Prescribed Schedule Card -->
+        <section id="scheduleBanner" class="glass-card rounded-2xl p-3.5 border border-rose-500/20 space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+                <div class="space-y-0.5 min-w-0">
+                    <div class="flex items-center space-x-1.5 flex-wrap gap-y-1">
+                        <span id="selectedDayTitle" class="text-base font-extrabold text-white leading-tight">Monday</span>
+                        <span id="todayBadge" class="hidden text-[9px] px-1.5 py-0.5 rounded-md bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30 uppercase tracking-wider leading-none">
+                            Today
+                        </span>
+                    </div>
+                    <h2 id="scheduleTitle" class="text-xs font-bold bg-gradient-to-r from-rose-300 to-violet-300 bg-clip-text text-transparent leading-snug">
+                        Do Kegels & Optional Masturbation
+                    </h2>
+                </div>
+                
+                <!-- Status Badge (Clean compact pill without cutoff) -->
+                <div id="statusBadge" class="px-2 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-1 bg-slate-800 text-slate-400 border border-slate-700 shrink-0 leading-normal">
+                    <i data-lucide="circle" class="w-2.5 h-2.5"></i> Pending
+                </div>
+            </div>
+
+            <div id="scheduleDetails" class="pt-2 border-t border-slate-800/80 text-[11px] text-slate-300 space-y-1">
+                <!-- Directives populated dynamically -->
+            </div>
+        </section>
+
+        <!-- Sexual Performance & Readiness Advisory Panel -->
+        <section id="readinessPanel" class="glass-card rounded-2xl p-3.5 border border-amber-500/30 space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+                <div class="flex items-center space-x-2 min-w-0">
+                    <div id="readinessIconBg" class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+                        <i id="readinessIcon" data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 class="text-xs font-bold text-white truncate leading-tight">Sexual Readiness Advisory</h3>
+                        <p class="text-[9px] text-slate-400 truncate mt-0.5">Evaluated for <span id="readinessDayTarget" class="text-slate-300 font-medium">Selected Day</span></p>
+                    </div>
+                </div>
+
+                <!-- Readiness Score Badge (Fits nicely without clipping) -->
+                <span id="readinessScoreBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0 leading-tight">
+                    Calculating...
+                </span>
+            </div>
+
+            <!-- Readiness Warnings Container -->
+            <div id="readinessWarnings" class="space-y-1.5 text-[11px]">
+                <!-- Dynamic Warnings -->
+            </div>
+
+            <!-- Tailored Advice & Tips -->
+            <div id="readinessAdvice" class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 text-[11px] text-slate-300 space-y-0.5">
+                <!-- Dynamic tips -->
+            </div>
+        </section>
+
+        <!-- Checklist Section -->
+        <section class="space-y-2">
+            <div class="flex items-center justify-between px-1">
+                <h3 class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Daily Checklist</h3>
+                <span class="text-[9px] text-slate-500">Tap to toggle activity</span>
+            </div>
+
+            <!-- Item 1: Kegels -->
+            <label class="group flex items-center justify-between p-3 glass-card rounded-xl cursor-pointer transition-all duration-150 border border-slate-800 hover:border-slate-700 active:scale-[0.99]">
+                <div class="flex items-center space-x-3 min-w-0">
+                    <div class="w-8 h-8 rounded-lg bg-violet-950/60 border border-violet-500/30 flex items-center justify-center text-violet-400 shrink-0">
+                        <i data-lucide="activity" class="w-4 h-4"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <span class="text-xs font-bold text-slate-100 block truncate">Kegel Exercise Session</span>
+                        <span id="kegelNote" class="text-[10px] text-slate-400 block truncate">Target: 3 sets x 10 squeezes</span>
+                    </div>
+                </div>
+                <div class="relative shrink-0 ml-2">
+                    <input type="checkbox" id="checkKegel" class="peer sr-only checkbox-glow">
+                    <div class="w-5 h-5 rounded-md border border-slate-600 bg-slate-900 peer-checked:bg-gradient-to-r peer-checked:from-rose-500 peer-checked:to-violet-600 peer-checked:border-transparent flex items-center justify-center transition-all">
+                        <i data-lucide="check" class="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity"></i>
+                    </div>
+                </div>
+            </label>
+
+            <!-- Item 2: Masturbation -->
+            <label class="group flex items-center justify-between p-3 glass-card rounded-xl cursor-pointer transition-all duration-150 border border-slate-800 hover:border-slate-700 active:scale-[0.99]">
+                <div class="flex items-center space-x-3 min-w-0">
+                    <div class="w-8 h-8 rounded-lg bg-rose-950/60 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0">
+                        <i data-lucide="hand" class="w-4 h-4"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <span class="text-xs font-bold text-slate-100 block truncate">Logged Masturbation</span>
+                        <span id="mastoNote" class="text-[10px] text-slate-400 block truncate">Optional today</span>
+                    </div>
+                </div>
+                <div class="relative shrink-0 ml-2">
+                    <input type="checkbox" id="checkMasto" class="peer sr-only checkbox-glow">
+                    <div class="w-5 h-5 rounded-md border border-slate-600 bg-slate-900 peer-checked:bg-gradient-to-r peer-checked:from-rose-500 peer-checked:to-violet-600 peer-checked:border-transparent flex items-center justify-center transition-all">
+                        <i data-lucide="check" class="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity"></i>
+                    </div>
+                </div>
+            </label>
+
+            <!-- Item 3: Sexual Intercourse -->
+            <label class="group flex items-center justify-between p-3 glass-card rounded-xl cursor-pointer transition-all duration-150 border border-slate-800 hover:border-slate-700 active:scale-[0.99]">
+                <div class="flex items-center space-x-3 min-w-0">
+                    <div class="w-8 h-8 rounded-lg bg-amber-950/60 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                        <i data-lucide="heart" class="w-4 h-4"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center space-x-1.5 flex-wrap gap-y-0.5">
+                            <span class="text-xs font-bold text-slate-100 block truncate">Sexual Intercourse</span>
+                            <span id="sexBadge" class="text-[8px] px-1 py-0.2 rounded font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                                Recommended
+                            </span>
+                        </div>
+                        <span id="sexNote" class="text-[10px] text-slate-400 block truncate">Sunday is prescribed Sex Day</span>
+                    </div>
+                </div>
+                <div class="relative shrink-0 ml-2">
+                    <input type="checkbox" id="checkSex" class="peer sr-only checkbox-glow">
+                    <div class="w-5 h-5 rounded-md border border-slate-600 bg-slate-900 peer-checked:bg-gradient-to-r peer-checked:from-rose-500 peer-checked:to-violet-600 peer-checked:border-transparent flex items-center justify-center transition-all">
+                        <i data-lucide="check" class="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity"></i>
+                    </div>
+                </div>
+            </label>
+        </section>
+
+        <!-- Weekly Summary Bar -->
+        <section class="glass-card rounded-2xl p-3 shadow-glass border border-slate-800">
+            <div class="grid grid-cols-3 divide-x divide-slate-800 text-center">
+                <div class="px-1">
+                    <span id="statKegels" class="text-base font-extrabold text-violet-400 block leading-tight">0</span>
+                    <span class="text-[9px] text-slate-400 uppercase tracking-wider font-medium">Kegels</span>
+                </div>
+                <div class="px-1">
+                    <span id="statCompliance" class="text-base font-extrabold text-rose-400 block leading-tight">0%</span>
+                    <span class="text-[9px] text-slate-400 uppercase tracking-wider font-medium">Schedule Met</span>
+                </div>
+                <div class="px-1">
+                    <span id="statSex" class="text-base font-extrabold text-amber-400 block leading-tight">0</span>
+                    <span class="text-[9px] text-slate-400 uppercase tracking-wider font-medium">Sex Sessions</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reset & Cleardown Footer Controls -->
+        <footer class="pt-1 pb-4 space-y-2">
+            <div class="grid grid-cols-2 gap-2">
+                <button id="clearSelectedDayBtn" class="py-2.5 px-3 rounded-xl glass-card text-xs font-semibold text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700 flex items-center justify-center gap-1.5 transition-all active:scale-95">
+                    <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-slate-400"></i> Clear Active Day
+                </button>
+                <button id="clearAllBtn" class="py-2.5 px-3 rounded-xl glass-card text-xs font-semibold text-rose-400 hover:text-rose-300 border border-rose-950/60 hover:border-rose-900 flex items-center justify-center gap-1.5 transition-all active:scale-95">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-500"></i> Reset Dashboard
+                </button>
+            </div>
+            
+            <p class="text-[9px] text-center text-slate-500 font-medium">
+                Keggy • Performance & rest rest window analysis
+            </p>
+        </footer>
+
+    </main>
+
+    <!-- Full Data Reset Confirmation Modal -->
+    <div id="resetModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card max-w-xs w-full p-4 rounded-2xl border border-rose-500/30 text-center space-y-3">
+            <div class="w-10 h-10 rounded-xl bg-rose-950/80 border border-rose-500/40 text-rose-400 flex items-center justify-center mx-auto">
+                <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <h3 class="text-sm font-bold text-white">Reset App Data & Dashboard?</h3>
+                <p class="text-[11px] text-slate-400 mt-1">This will permanently clear all logs, compliance stats, and readiness records across every day.</p>
+            </div>
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <button id="cancelReset" class="py-2 px-3 rounded-lg bg-slate-800 text-xs font-semibold text-slate-300 hover:bg-slate-700 transition">
+                    Cancel
+                </button>
+                <button id="confirmReset" class="py-2 px-3 rounded-lg bg-gradient-to-r from-rose-600 to-rose-700 text-xs font-semibold text-white hover:from-rose-500 hover:to-rose-600 shadow-neon-rose transition">
+                    Reset All
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Weekly Prescribed Schedule Guidelines
+        const SCHEDULE_DATA = {
+            Monday: {
+                short: "Mon",
+                title: "Do Kegels & Optional Masturbation",
+                kegelRequired: true,
+                mastoForbidden: false,
+                sexRecommended: false,
+                guidelines: [
+                    "• Complete 3 Kegel sets throughout the day.",
+                    "• Masturbation is optional today.",
+                    "• Sex is unscheduled (Sunday is prescribed)."
+                ]
+            },
+            Tuesday: {
+                short: "Tue",
+                title: "Do Kegels & No Masturbation",
+                kegelRequired: true,
+                mastoForbidden: true,
+                sexRecommended: false,
+                guidelines: [
+                    "• Complete 3 Kegel sets throughout the day.",
+                    "• Abstain from masturbation today.",
+                    "• Sex is unscheduled/optional."
+                ]
+            },
+            Wednesday: {
+                short: "Wed",
+                title: "Do Kegels & Optional Masturbation",
+                kegelRequired: true,
+                mastoForbidden: false,
+                sexRecommended: false,
+                guidelines: [
+                    "• Complete 3 Kegel sets throughout the day.",
+                    "• Masturbation is optional today.",
+                    "• Sex is unscheduled/optional."
+                ]
+            },
+            Thursday: {
+                short: "Thu",
+                title: "Do Kegels & No Masturbation",
+                kegelRequired: true,
+                mastoForbidden: true,
+                sexRecommended: false,
+                guidelines: [
+                    "• Complete 3 Kegel sets throughout the day.",
+                    "• Abstain from masturbation today.",
+                    "• Sex is unscheduled/optional."
+                ]
+            },
+            Friday: {
+                short: "Fri",
+                title: "Rest Day (No Kegels & No Masturbation)",
+                kegelRequired: false,
+                mastoForbidden: true,
+                sexRecommended: false,
+                guidelines: [
+                    "• Pelvic rest day: No Kegel exercises.",
+                    "• Abstain from masturbation to build stamina.",
+                    "• Sex is unscheduled/optional."
+                ]
+            },
+            Saturday: {
+                short: "Sat",
+                title: "Rest Day (No Kegels & No Masturbation)",
+                kegelRequired: false,
+                mastoForbidden: true,
+                sexRecommended: false,
+                guidelines: [
+                    "• Pelvic rest day: No Kegels.",
+                    "• Rest and prepare for Sunday Intimacy.",
+                    "• Sex is unscheduled/optional."
+                ]
+            },
+            Sunday: {
+                short: "Sun",
+                title: "Rest Day for Kegels & Prescribed Sex Day",
+                kegelRequired: false,
+                mastoForbidden: true,
+                sexRecommended: true,
+                guidelines: [
+                    "• Rest day for Kegel exercises.",
+                    "• Primary focus: Sexual Intercourse Day! ❤️",
+                    "• Abstain from masturbation."
+                ]
+            }
+        };
+
+        const DAYS_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+        // State Management
+        let currentDay = getTodayName();
+        let appData = loadState();
+
+        // Cached DOM Elements
+        const daysBar = document.getElementById('daysBar');
+        const todayBtn = document.getElementById('todayBtn');
+        const selectedDayTitle = document.getElementById('selectedDayTitle');
+        const todayBadge = document.getElementById('todayBadge');
+        const scheduleTitle = document.getElementById('scheduleTitle');
+        const scheduleDetails = document.getElementById('scheduleDetails');
+        const statusBadge = document.getElementById('statusBadge');
+
+        const checkKegel = document.getElementById('checkKegel');
+        const checkMasto = document.getElementById('checkMasto');
+        const checkSex = document.getElementById('checkSex');
+
+        const kegelNote = document.getElementById('kegelNote');
+        const mastoNote = document.getElementById('mastoNote');
+        const sexNote = document.getElementById('sexNote');
+        const sexBadge = document.getElementById('sexBadge');
+
+        const readinessPanel = document.getElementById('readinessPanel');
+        const readinessIconBg = document.getElementById('readinessIconBg');
+        const readinessIcon = document.getElementById('readinessIcon');
+        const readinessDayTarget = document.getElementById('readinessDayTarget');
+        const readinessScoreBadge = document.getElementById('readinessScoreBadge');
+        const readinessWarnings = document.getElementById('readinessWarnings');
+        const readinessAdvice = document.getElementById('readinessAdvice');
+
+        const statKegels = document.getElementById('statKegels');
+        const statCompliance = document.getElementById('statCompliance');
+        const statSex = document.getElementById('statSex');
+        const streakCount = document.getElementById('streakCount');
+
+        const resetModal = document.getElementById('resetModal');
+        const clearSelectedDayBtn = document.getElementById('clearSelectedDayBtn');
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        const cancelReset = document.getElementById('cancelReset');
+        const confirmReset = document.getElementById('confirmReset');
+
+        function getTodayName() {
+            const todayIdx = new Date().getDay();
+            const map = { 0: "Sunday", 1: "Monday", 2: "Tuesday", 3: "Wednesday", 4: "Thursday", 5: "Friday", 6: "Saturday" };
+            return map[todayIdx];
+        }
+
+        function loadState() {
+            const defaultState = {};
+            DAYS_ORDER.forEach(day => {
+                defaultState[day] = { kegel: false, masto: false, sex: false };
+            });
+
+            try {
+                const saved = localStorage.getItem('keggy_data_v4');
+                if (saved) return JSON.parse(saved);
+            } catch (e) {
+                console.error("Failed to load local storage", e);
+            }
+            return defaultState;
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem('keggy_data_v4', JSON.stringify(appData));
+            } catch (e) {
+                console.error("Failed to save to local storage", e);
+            }
+        }
+
+        // Helper: get past N days INCLUDING target day (0 = same day, 1 = yesterday, etc.)
+        function getRecentWindowDays(targetDay, count) {
+            const idx = DAYS_ORDER.indexOf(targetDay);
+            const windowDays = [];
+            for (let i = 0; i < count; i++) {
+                let dayIdx = (idx - i + 7) % 7;
+                windowDays.push(DAYS_ORDER[dayIdx]);
+            }
+            return windowDays;
+        }
+
+        // Calculate Sexual Readiness & Analysis Rules (including same-day activity)
+        function analyzeSexualReadiness(targetDay) {
+            // Rule: 2 days of no Kegels (Target day + 1 day prior = 2 total days)
+            const kegelWindow = getRecentWindowDays(targetDay, 2);
+            // Rule: 3 days of no Masturbation (Target day + 2 days prior = 3 total days)
+            const mastoWindow = getRecentWindowDays(targetDay, 3);
+
+            let kegelViolations = [];
+            let mastoViolations = [];
+
+            kegelWindow.forEach(day => {
+                if (appData[day] && appData[day].kegel) {
+                    kegelViolations.push(day === targetDay ? "Today" : day);
+                }
+            });
+
+            mastoWindow.forEach(day => {
+                if (appData[day] && appData[day].masto) {
+                    mastoViolations.push(day === targetDay ? "Today" : day);
+                }
+            });
+
+            return {
+                kegelViolations,
+                mastoViolations,
+                isKegelRestMet: kegelViolations.length === 0,
+                isMastoRestMet: mastoViolations.length === 0,
+                targetDay
+            };
+        }
+
+        function renderDaysBar() {
+            const actualToday = getTodayName();
+            daysBar.innerHTML = '';
+
+            DAYS_ORDER.forEach(day => {
+                const isSelected = day === currentDay;
+                const isToday = day === actualToday;
+                const shortName = SCHEDULE_DATA[day].short;
+                const hasActivity = appData[day].kegel || appData[day].masto || appData[day].sex;
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `py-1.5 px-0.5 rounded-xl text-center flex flex-col items-center justify-center transition-all ${
+                    isSelected 
+                        ? 'bg-gradient-to-b from-rose-500 to-violet-600 text-white font-bold shadow-neon-rose scale-[1.03]' 
+                        : 'bg-slate-900/90 text-slate-400 hover:text-slate-200 border border-slate-800'
+                }`;
+
+                btn.innerHTML = `
+                    <span class="text-[10px] font-bold leading-tight">${shortName}</span>
+                    <div class="flex items-center gap-0.5 mt-0.5">
+                        ${isToday ? `<span class="w-1 h-1 rounded-full ${isSelected ? 'bg-white' : 'bg-rose-400'}"></span>` : ''}
+                        ${hasActivity ? `<span class="w-1 h-1 rounded-full ${isSelected ? 'bg-amber-300' : 'bg-violet-400'}"></span>` : ''}
+                    </div>
+                `;
+
+                btn.addEventListener('click', () => {
+                    currentDay = day;
+                    updateUI();
+                });
+
+                daysBar.appendChild(btn);
+            });
+        }
+
+        function updateUI() {
+            renderDaysBar();
+
+            const schedule = SCHEDULE_DATA[currentDay];
+            const dayState = appData[currentDay];
+            const actualToday = getTodayName();
+
+            selectedDayTitle.textContent = currentDay;
+
+            if (currentDay === actualToday) {
+                todayBadge.classList.remove('hidden');
+            } else {
+                todayBadge.classList.add('hidden');
+            }
+
+            scheduleTitle.textContent = schedule.title;
+            scheduleDetails.innerHTML = schedule.guidelines.map(g => `<p>${g}</p>`).join('');
+
+            // Label notes
+            kegelNote.textContent = schedule.kegelRequired ? "Required session today" : "Rest day (No Kegels)";
+            mastoNote.textContent = schedule.mastoForbidden ? "Restricted today" : "Optional today";
+
+            if (schedule.sexRecommended) {
+                sexBadge.textContent = "Recommended";
+                sexBadge.className = "text-[8px] px-1 py-0.2 rounded font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30";
+                sexNote.textContent = "Prescribed Sunday Sex Day! ❤️";
+            } else {
+                sexBadge.textContent = "Unscheduled";
+                sexBadge.className = "text-[8px] px-1 py-0.2 rounded font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700";
+                sexNote.textContent = "Allowed, but check readiness below";
+            }
+
+            // Checkbox state sync
+            checkKegel.checked = !!dayState.kegel;
+            checkMasto.checked = !!dayState.masto;
+            checkSex.checked = !!dayState.sex;
+
+            // Compliance status badge
+            const comp = evaluateScheduleCompliance(currentDay, dayState);
+            if (comp.met) {
+                statusBadge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shrink-0 leading-normal";
+                statusBadge.innerHTML = `<i data-lucide="check-circle-2" class="w-3 h-3"></i> Schedule Met`;
+            } else {
+                statusBadge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-1 bg-slate-800 text-slate-400 border border-slate-700 shrink-0 leading-normal";
+                statusBadge.innerHTML = `<i data-lucide="clock" class="w-3 h-3"></i> Pending`;
+            }
+
+            // Real-time Sexual Readiness Analysis
+            renderReadinessAdvisory(currentDay);
+
+            // Global Statistics recalculation
+            updateStats();
+
+            lucide.createIcons();
+        }
+
+        function evaluateScheduleCompliance(dayName, dayState) {
+            const schedule = SCHEDULE_DATA[dayName];
+            
+            if (schedule.mastoForbidden && dayState.masto) {
+                return { met: false, reason: "Masturbation logged on a rest day." };
+            }
+
+            if (schedule.kegelRequired && !dayState.kegel) {
+                return { met: false, reason: "Kegel session required." };
+            }
+
+            if (!schedule.kegelRequired && dayState.kegel) {
+                return { met: false, reason: "Kegels done on a rest day." };
+            }
+
+            return { met: true, reason: "Schedule followed." };
+        }
+
+        function renderReadinessAdvisory(targetDay) {
+            const analysis = analyzeSexualReadiness(targetDay);
+            readinessDayTarget.textContent = targetDay;
+
+            let warningsHtml = '';
+            let adviceHtml = '';
+
+            if (analysis.isKegelRestMet && analysis.isMastoRestMet) {
+                readinessPanel.className = "glass-card rounded-2xl p-3.5 border border-emerald-500/40 space-y-2.5 shadow-neon-rose";
+                readinessIconBg.className = "w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0";
+                readinessIcon.setAttribute('data-lucide', 'sparkles');
+                readinessScoreBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shrink-0 leading-tight";
+                readinessScoreBadge.textContent = "100% Prime Readiness";
+
+                warningsHtml = `
+                    <div class="p-2 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-200 flex items-start gap-1.5">
+                        <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5"></i>
+                        <div>
+                            <strong class="font-bold text-[11px]">Optimal Rest & Stamina Achieved!</strong>
+                            <p class="text-[10px] text-emerald-300/80 mt-0.5">2 days clear of Kegels and 3 days clear of masturbation. High sensitivity, volume, and muscle control expected.</p>
+                        </div>
+                    </div>
+                `;
+
+                adviceHtml = `
+                    <p class="text-emerald-300 font-semibold flex items-center gap-1 text-[11px]">
+                        <i data-lucide="zap" class="w-3 h-3 text-amber-400"></i> Performance Tip:
+                    </p>
+                    <p class="text-[10px] text-slate-300">Maintain calm diaphragm breathing during intercourse. Pelvic floor muscles are fully rested and ready.</p>
+                `;
+            } else {
+                readinessPanel.className = "glass-card rounded-2xl p-3.5 border border-amber-500/40 space-y-2.5";
+                readinessIconBg.className = "w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0";
+                readinessIcon.setAttribute('data-lucide', 'shield-alert');
+                
+                let scoreText = "Sub-optimal Rest";
+                if (!analysis.isKegelRestMet && !analysis.isMastoRestMet) {
+                    scoreText = "High Fatigue Risk";
+                    readinessPanel.className = "glass-card rounded-2xl p-3.5 border border-rose-500/50 space-y-2.5";
+                    readinessIconBg.className = "w-7 h-7 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0";
+                }
+
+                readinessScoreBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0 leading-tight";
+                readinessScoreBadge.textContent = scoreText;
+
+                // Warnings logic for Kegel violation
+                if (!analysis.isKegelRestMet) {
+                    const daysStr = analysis.kegelViolations.join(', ');
+                    warningsHtml += `
+                        <div class="p-2 rounded-xl bg-rose-950/40 border border-rose-500/40 text-rose-200 flex items-start gap-1.5">
+                            <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-rose-400 shrink-0 mt-0.5"></i>
+                            <div>
+                                <strong class="font-bold text-rose-300 text-[11px]">Kegel Fatigue Rule Broken (${daysStr}):</strong>
+                                <p class="text-[10px] text-rose-200/90 mt-0.5">Kegels logged within the 2-day window. Over-worked pelvic floor muscles can cause cramping or difficulty relaxing prior to climax.</p>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Warnings logic for Masturbation violation
+                if (!analysis.isMastoRestMet) {
+                    const daysStr = analysis.mastoViolations.join(', ');
+                    warningsHtml += `
+                        <div class="p-2 rounded-xl bg-amber-950/40 border border-amber-500/40 text-amber-200 flex items-start gap-1.5">
+                            <i data-lucide="alert-circle" class="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5"></i>
+                            <div>
+                                <strong class="font-bold text-amber-300 text-[11px]">3-Day Rest Rule Broken (${daysStr}):</strong>
+                                <p class="text-[10px] text-amber-200/90 mt-0.5">Masturbation logged within the 3-day window. Expect lower semen volume, extended refractory period, or reduced sensitivity.</p>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                adviceHtml = `
+                    <p class="text-amber-300 font-semibold flex items-center gap-1 text-[11px]">
+                        <i data-lucide="life-buoy" class="w-3 h-3 text-amber-400"></i> Recovery Tip:
+                    </p>
+                    <p class="text-[10px] text-slate-300">Practice reverse Kegels (gentle pelvic muscle release) to manage involuntary tension during intimacy.</p>
+                `;
+            }
+
+            readinessWarnings.innerHTML = warningsHtml;
+            readinessAdvice.innerHTML = adviceHtml;
+            lucide.createIcons();
+        }
+
+        function updateStats() {
+            let kegelCount = 0;
+            let sexCount = 0;
+            let metCount = 0;
+
+            DAYS_ORDER.forEach(day => {
+                const state = appData[day];
+                if (state.kegel) kegelCount++;
+                if (state.sex) sexCount++;
+                
+                const comp = evaluateScheduleCompliance(day, state);
+                if (comp.met) metCount++;
+            });
+
+            statKegels.textContent = kegelCount;
+            statSex.textContent = sexCount;
+            const pct = Math.round((metCount / 7) * 100);
+            statCompliance.textContent = `${pct}%`;
+            streakCount.textContent = metCount;
+        }
+
+        function triggerConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 40,
+                    spread: 60,
+                    origin: { y: 0.8 },
+                    colors: ['#f43f5e', '#8b5cf6', '#f59e0b']
+                });
+            }
+        }
+
+        function setupEventListeners() {
+            // Jump to Today
+            todayBtn.addEventListener('click', () => {
+                currentDay = getTodayName();
+                updateUI();
+            });
+
+            // Instant updates on checkbox toggle
+            checkKegel.addEventListener('change', (e) => {
+                appData[currentDay].kegel = e.target.checked;
+                saveState();
+                updateUI(); // Immediately re-evaluates same-day readiness & advisory
+            });
+
+            checkMasto.addEventListener('change', (e) => {
+                appData[currentDay].masto = e.target.checked;
+                saveState();
+                updateUI(); // Immediately re-evaluates same-day readiness & advisory
+            });
+
+            checkSex.addEventListener('change', (e) => {
+                appData[currentDay].sex = e.target.checked;
+                saveState();
+                if (e.target.checked) triggerConfetti();
+                updateUI();
+            });
+
+            // Clear Active Day
+            clearSelectedDayBtn.addEventListener('click', () => {
+                appData[currentDay] = { kegel: false, masto: false, sex: false };
+                saveState();
+                updateUI();
+            });
+
+            // Reset Modal Handlers
+            clearAllBtn.addEventListener('click', () => {
+                resetModal.classList.remove('hidden');
+            });
+
+            cancelReset.addEventListener('click', () => {
+                resetModal.classList.add('hidden');
+            });
+
+            confirmReset.addEventListener('click', () => {
+                DAYS_ORDER.forEach(day => {
+                    appData[day] = { kegel: false, masto: false, sex: false };
+                });
+                localStorage.removeItem('keggy_data_v4');
+                saveState();
+                resetModal.classList.add('hidden');
+                updateUI();
+            });
+        }
+
+        // Initialize application
+        window.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            updateUI();
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
